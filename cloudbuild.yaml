@@ -1,0 +1,26 @@
+steps:
+  # build and push docker image
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - --build-arg
+      - NODE_ENV=$_NODE_ENV
+      - --cache-repo=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:latest
+      - --destination=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - --cache=true
+      - --cache-ttl=24h
+    id: 'Docker Build and Push'
+  # run cloudrun app
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - '-c'
+      - |
+       gcloud beta run deploy $_SERVICE_NAME --platform=managed \
+        --image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID \
+        --region=$_DEPLOY_REGION --quiet --port=8080 --timeout=300 --min-instances=1 --max-instances=10 \
+        --memory=512Mi --cpu=1 --no-cpu-throttling --allow-unauthenticated --execution-environment=gen2 \
+        --set-env-vars NODE_ENV=$_NODE_ENV \
+        --set-env-vars DECK_URL=$_DECK_URL \
+    id: 'Cloud Run Deploy'
+    entrypoint: bash
+timeout: 1000s

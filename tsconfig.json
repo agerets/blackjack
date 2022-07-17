@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "lib": ["es2020"],
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "sourceMap": true,
+        "strict": true,
+        "resolveJsonModule": true,
+        "types": [
+            "jest",
+            "./src/utils/express/type"
+        ],
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.json",
+        "src/**/*.env",
+    ],
+    "exclude": ["node_modules"]
+}
